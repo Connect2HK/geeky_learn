@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login — GeekyLearn</title>
+<!-- Firebase config injected by Vercel env vars — NEVER hardcode keys here -->
+<meta name="fb-api-key"          content="%FIREBASE_API_KEY%">
+<meta name="fb-auth-domain"      content="%FIREBASE_AUTH_DOMAIN%">
+<meta name="fb-project-id"       content="%FIREBASE_PROJECT_ID%">
+<meta name="fb-storage-bucket"   content="%FIREBASE_STORAGE_BUCKET%">
+<meta name="fb-messaging-id"     content="%FIREBASE_MESSAGING_ID%">
+<meta name="fb-app-id"           content="%FIREBASE_APP_ID%">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{--void:#000005;--border:rgba(0,255,200,0.12);--border2:rgba(0,255,200,0.28);--cyan:#00ffc8;--magenta:#ff00aa;--red:#ff2d55;--text:#c8d8e8;--muted:#445566;--bright:#fff;}
+body{background:var(--void);color:var(--text);font-family:'Rajdhani',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;overflow:hidden;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,255,200,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,200,0.03) 1px,transparent 1px);background-size:50px 50px;pointer-events:none;}
+.cfg-err{display:none;position:fixed;top:0;left:0;right:0;background:#ff2d55;color:#fff;text-align:center;padding:10px;font-size:12px;font-family:'Orbitron',monospace;letter-spacing:0.05em;z-index:999;}
+.cfg-err.on{display:block;}
+.back{position:fixed;top:24px;left:24px;color:var(--muted);text-decoration:none;font-size:13px;letter-spacing:0.1em;text-transform:uppercase;transition:color 0.2s;z-index:10;font-weight:600;}
+.back:hover{color:var(--cyan);}
+.box{width:100%;max-width:420px;background:rgba(7,7,26,0.92);border:1px solid var(--border2);position:relative;padding:40px;animation:fadeUp 0.5s ease both;backdrop-filter:blur(20px);}
+.box::before,.box::after{content:'';position:absolute;width:20px;height:20px;border-color:var(--cyan);border-style:solid;}
+.box::before{top:-1px;left:-1px;border-width:2px 0 0 2px;}
+.box::after{bottom:-1px;right:-1px;border-width:0 2px 2px 0;}
+.logo{font-family:'Orbitron',monospace;font-weight:900;font-size:1.3rem;color:var(--cyan);text-align:center;margin-bottom:6px;letter-spacing:0.1em;text-shadow:0 0 20px rgba(0,255,200,0.4);}
+.logo em{color:var(--magenta);font-style:normal;}
+.tagline{text-align:center;color:var(--muted);font-size:12px;margin-bottom:32px;letter-spacing:0.1em;text-transform:uppercase;}
+.sec-line{display:flex;align-items:center;gap:12px;margin-bottom:24px;}
+.sec-line h2{font-family:'Orbitron',monospace;font-size:14px;font-weight:700;color:var(--bright);letter-spacing:0.08em;white-space:nowrap;}
+.sec-line::after{content:'';flex:1;height:1px;background:var(--border);}
+.field{margin-bottom:16px;}
+label{display:block;font-size:10px;color:var(--cyan);margin-bottom:6px;letter-spacing:0.18em;text-transform:uppercase;font-weight:600;}
+input{width:100%;padding:12px 14px;background:rgba(0,255,200,0.03);border:1px solid var(--border);color:var(--text);font-family:'Rajdhani',sans-serif;font-size:15px;transition:all 0.2s;outline:none;letter-spacing:0.04em;}
+input:focus{border-color:var(--cyan);box-shadow:0 0 16px rgba(0,255,200,0.08);}
+input::placeholder{color:var(--muted);}
+.btn{width:100%;padding:14px;background:var(--cyan);border:none;color:#000;font-family:'Orbitron',monospace;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:0.1em;transition:all 0.2s;margin-top:8px;position:relative;overflow:hidden;}
+.btn::before{content:'';position:absolute;top:-50%;left:-60%;width:40%;height:200%;background:rgba(255,255,255,0.2);transform:skewX(-20deg);animation:shimmer 2.5s infinite;}
+@keyframes shimmer{0%{left:-60%}100%{left:130%}}
+.btn:hover{box-shadow:0 0 24px rgba(0,255,200,0.4);transform:translateY(-1px);}
+.btn:disabled{opacity:0.4;cursor:not-allowed;transform:none;}
+.forgot{text-align:right;margin-top:6px;}
+.forgot a{font-size:12px;color:var(--muted);text-decoration:none;transition:color 0.2s;}
+.forgot a:hover{color:var(--cyan);}
+.divider{text-align:center;color:var(--muted);font-size:11px;margin:20px 0;letter-spacing:0.1em;position:relative;}
+.divider::before,.divider::after{content:'';position:absolute;top:50%;width:42%;height:1px;background:var(--border);}
+.divider::before{left:0;}.divider::after{right:0;}
+.link-row{text-align:center;font-size:13px;color:var(--muted);margin-top:18px;}
+.link-row a{color:var(--cyan);text-decoration:none;font-weight:600;}
+.msg{padding:10px 14px;font-size:12px;margin-bottom:14px;display:none;border-left:2px solid;}
+.msg.error{background:rgba(255,45,85,0.07);border-color:var(--red);color:var(--red);display:block;}
+.msg.success{background:rgba(0,255,200,0.07);border-color:var(--cyan);color:var(--cyan);display:block;}
+.spin{display:inline-block;width:13px;height:13px;border:2px solid rgba(0,0,0,0.3);border-top-color:#000;border-radius:50%;animation:sp 0.7s linear infinite;margin-right:6px;vertical-align:middle;}
+@keyframes sp{to{transform:rotate(360deg)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<div class="cfg-err" id="cfg-err">⚠ Firebase config missing — add Environment Variables in Vercel. See SETUP-GUIDE.html</div>
+<a class="back" href="index.html">← Back</a>
+<div class="box">
+  <div class="logo">GEEKY<em>LEARN</em></div>
+  <div class="tagline">// Content Empire for X Creators</div>
+  <div class="sec-line"><h2>ACCESS TERMINAL</h2></div>
+  <div id="msg" class="msg"></div>
+  <div class="field"><label>Email</label><input type="email" id="email" placeholder="operator@domain.com" autocomplete="email"></div>
+  <div class="field"><label>Password</label><input type="password" id="password" placeholder="••••••••" autocomplete="current-password"></div>
+  <div class="forgot"><a href="#" onclick="forgotPass(event)">Forgot password?</a></div>
+  <button class="btn" id="btn" onclick="doLogin()">⚡ AUTHENTICATE</button>
+  <div class="divider">or</div>
+  <div class="link-row">No account? <a href="signup.html">Create one free →</a></div>
+</div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, sendPasswordResetEmail }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+const g = n => { const e=document.querySelector(`meta[name="${n}"]`); return e?e.content:''; };
+const cfg = { apiKey:g('fb-api-key'), authDomain:g('fb-auth-domain'), projectId:g('fb-project-id'), storageBucket:g('fb-storage-bucket'), messagingSenderId:g('fb-messaging-id'), appId:g('fb-app-id') };
+const ok = Object.values(cfg).every(v=>v&&!v.startsWith('%'));
+if(!ok) document.getElementById('cfg-err').classList.add('on');
+const auth = ok ? getAuth(initializeApp(cfg)) : null;
+if(auth) onAuthStateChanged(auth, u=>{ if(u) location.href='app.html'; });
+
+function rl(){ const k='gl_lr',n=Date.now(); let d; try{d=JSON.parse(localStorage.getItem(k)||'{"c":0,"t":0}');}catch{d={c:0,t:0};} if(n-d.t>600000){localStorage.setItem(k,JSON.stringify({c:1,t:n}));return true;} if(d.c>=5)return false; localStorage.setItem(k,JSON.stringify({c:d.c+1,t:d.t}));return true; }
+function msg(t,tp){ const e=document.getElementById('msg'); e.textContent=t; e.className='msg '+tp; }
+
+window.doLogin = async()=>{
+  if(!auth){msg('⚠ Not configured.','error');return;}
+  const em=document.getElementById('email').value.trim(), pw=document.getElementById('password').value, b=document.getElementById('btn');
+  if(!em||!pw){msg('⚠ Fill both fields.','error');return;}
+  if(!rl()){msg('⚠ Too many attempts. Wait 10 min.','error');return;}
+  b.disabled=true; b.innerHTML='<span class="spin"></span>AUTHENTICATING…';
+  try{ await signInWithEmailAndPassword(auth,em,pw); msg('✓ Access granted…','success'); setTimeout(()=>location.href='app.html',800); }
+  catch(e){ const m={'auth/invalid-credential':'Wrong email or password.','auth/too-many-requests':'Too many attempts.','auth/user-disabled':'Account disabled.'}; msg('⚠ '+(m[e.code]||e.message),'error'); b.disabled=false; b.innerHTML='⚡ AUTHENTICATE'; }
+};
+window.forgotPass = async(e)=>{ e.preventDefault(); if(!auth)return; const em=document.getElementById('email').value.trim(); if(!em){msg('⚠ Enter email first.','error');return;} try{await sendPasswordResetEmail(auth,em);msg('✓ Reset link sent!','success');}catch(err){msg('⚠ '+err.message,'error');} };
+document.addEventListener('keydown',e=>{ if(e.key==='Enter') window.doLogin(); });
+</script>
+</body>
+</html>
